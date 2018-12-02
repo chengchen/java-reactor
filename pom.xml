@@ -8,16 +8,37 @@
     <artifactId>opentracing-reactor</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>OpenTracing Instrumentation for Reactor</description>
+    <url>https://github.com/opentracing-contrib/java-reactor</url>
+    <inceptionYear>2018</inceptionYear>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>jam01</id>
+            <name>Jose Montoya</name>
+            <email>jam01@protonmail.com</email>
+        </developer>
+    </developers>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+
+        <version.reactor-core>3.2.3.RELEASE</version.reactor-core>
         <version.io.opentracing>0.31.0</version.io.opentracing>
+        <version.io.opentracing.agent>0.4.0</version.io.opentracing.agent>
         <version.junit>4.12</version.junit>
         <version.org.mockito-mockito-all>1.10.19</version.org.mockito-mockito-all>
-        <version.io.opentracing.agent>0.4.0</version.io.opentracing.agent>
-        <version.reactor-core>3.2.3.RELEASE</version.reactor-core>
     </properties>
 
     <dependencies>
@@ -26,12 +47,7 @@
             <artifactId>reactor-core</artifactId>
             <version>${version.reactor-core}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.opentracing.contrib</groupId>
-            <artifactId>opentracing-agent</artifactId>
-            <scope>provided</scope>
-            <version>${version.io.opentracing.agent}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.opentracing</groupId>
@@ -62,5 +78,52 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>tree</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <outputType>tgf</outputType>
+                            <outputFile>${project.build.directory}/generated-resources/dependencies.tgf</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.opentracing.contrib</groupId>
+                <artifactId>specialagent-maven-plugin</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>fingerprint</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <destFile>${project.build.directory}/generated-resources/fingerprint.bin</destFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
