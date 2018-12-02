@@ -1,0 +1,21 @@
+##################################################################################
+# java-reactor Rule Set
+#
+# This rule will be triggered when the Hooks class is initialized. <clinit> allows
+# us to register the OpenTracing operators after static initialization block with
+# the drawback that this rule will not be triggered if submitted after the class
+# has been loaded, ie. dynamic attach scenarios.
+
+HELPER io.opentracing.contrib.agent.OpenTracingHelper
+
+RULE reactor.core.publisher.Hooks.<clinit>
+CLASS reactor.core.publisher.Hooks
+#CLASS reactor.core.publisher.Flux
+METHOD <clinit>
+AT EXIT
+IF TRUE
+DO
+  reactor.core.publisher.Hooks.onEachOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
+  reactor.core.publisher.Hooks.onLastOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()))
+ENDRULE
+
