@@ -1,21 +1,43 @@
 ##################################################################################
 # java-reactor Rule Set
 #
-# This rule will be triggered when the Hooks class is initialized. <clinit> allows
-# us to register the OpenTracing operators after static initialization block with
-# the drawback that this rule will not be triggered if submitted after the class
-# has been loaded, ie. dynamic attach scenarios.
+# These rules will intercept calls to the onAssembly method on reactor's
+# implementations of Publisher. It retrieves configured Hooks for "cross cutting
+# concerns". Here we register TracedSubscriber.asOperator hook and record it with
+# the Helper.
 
 HELPER io.opentracing.contrib.agent.OpenTracingHelper
 
-RULE reactor.core.publisher.Hooks.<clinit>
-CLASS reactor.core.publisher.Hooks
-#CLASS reactor.core.publisher.Flux
-METHOD <clinit>
-AT EXIT
-IF TRUE
+RULE reactor.core.publisher.Flux.onAssembly
+CLASS reactor.core.publisher.Flux
+METHOD onAssembly
+AT ENTRY
+IF getState(reactor.core.publisher.Hooks.class) == 0
 DO
   reactor.core.publisher.Hooks.onEachOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
-  reactor.core.publisher.Hooks.onLastOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()))
+  reactor.core.publisher.Hooks.onLastOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
+  setState(reactor.core.publisher.Hooks.class, 1)
+ENDRULE
+
+RULE reactor.core.publisher.Mono.onAssembly
+CLASS reactor.core.publisher.Mono
+METHOD onAssembly
+AT ENTRY
+IF getState(reactor.core.publisher.Hooks.class) == 0
+DO
+  reactor.core.publisher.Hooks.onEachOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
+  reactor.core.publisher.Hooks.onLastOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
+  setState(reactor.core.publisher.Hooks.class, 1)
+ENDRULE
+
+RULE reactor.core.publisher.ParallelFlux.onAssembly
+CLASS reactor.core.publisher.ParallelFlux
+METHOD onAssembly
+AT ENTRY
+IF getState(reactor.core.publisher.Hooks.class) == 0
+DO
+  reactor.core.publisher.Hooks.onEachOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
+  reactor.core.publisher.Hooks.onLastOperator(io.opentracing.contrib.reactor.TracedSubscriber.asOperator(getTracer()));
+  setState(reactor.core.publisher.Hooks.class, 1)
 ENDRULE
 
