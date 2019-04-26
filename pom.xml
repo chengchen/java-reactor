@@ -19,7 +19,7 @@
 
 	<groupId>io.opentracing.contrib</groupId>
 	<artifactId>opentracing-reactor</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.2-CJI</version>
 
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>OpenTracing Instrumentation for Reactor</description>

@@ -13,27 +13,28 @@
  */
 package io.opentracing.contrib.reactor;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
 import reactor.core.publisher.Hooks;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 public class MonoAgentIntercept {
-  public static final AtomicBoolean inited = new AtomicBoolean();
 
-  public static void enter() {
-    if (inited.get())
-      return;
+    public static final AtomicBoolean inited = new AtomicBoolean();
 
-    synchronized (inited) {
-      if (inited.get())
-        return;
+    public static void enter() {
+        if (inited.get()) { return; }
 
-      final Tracer tracer = GlobalTracer.get();
-      Hooks.onEachOperator(TracedSubscriber.asOperator(tracer));
-      Hooks.onLastOperator(TracedSubscriber.asOperator(tracer));
-      inited.set(true);
+        synchronized (inited) {
+            if (inited.get()) { return; }
+
+            final Supplier<Tracer> tracer = GlobalTracer::get;
+            Hooks.onEachOperator(TracedSubscriber.asOperator(tracer));
+            Hooks.onLastOperator(TracedSubscriber.asOperator(tracer));
+            inited.set(true);
+        }
     }
-  }
+
 }
